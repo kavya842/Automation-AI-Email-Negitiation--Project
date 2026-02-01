@@ -23,7 +23,7 @@ Version Control: Git & GitHub
  4.Project Structure
 Automation-AI-Email-Negitiation--Project/
 │
-├── backend
+├── backend/
 │      ├── settings.py
 │      ├── urls.py
 │      └── views.py
@@ -46,10 +46,10 @@ The response is sent back via email
 Negotiation progress is tracked in the system
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-6.n8n Webhook Configuration
+ 6.n8n Webhook Configuration
 This webhook connects the Django application with the automation workflow.
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 7.Future Enhancements
 Advanced AI negotiation strategies
 Cloud deployment (AWS / Azure)
