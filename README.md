@@ -12,12 +12,12 @@ Centralized tracking of negotiation status
 Secure login and dashboard access.
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- 3.Used Technology
-Backend: Python (Django)
-Frontend: HTML, CSS, JavaScript
-Automation: n8n (Webhook integration)
-Database: SQLite / PostgreSQL
-Version Control: Git & GitHub
+   3.Used Technology
+ Backend: Python (Django)
+ Frontend: HTML, CSS, JavaScript
+ Automation: n8n (Webhook integration)
+ Database: SQLite / PostgreSQL
+ Version Control: Git & GitHub
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  4.Project Structure
@@ -56,6 +56,7 @@ Cloud deployment (AWS / Azure)
 Multi-platform email integration
 Analytics and reporting dashboard
 
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Kavya Vankayalapati
 GitHub: https://github.com/kavya842
+https://www.linkedin.com/in/kavya-vankayalapati-610604265
