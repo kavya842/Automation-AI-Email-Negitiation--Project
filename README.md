@@ -1,9 +1,11 @@
  1. Automation AI Email Negotiation Project
+    
 Project Overview
 The Automation AI Email Negotiation Project is designed to automate and optimize email-based negotiations using Artificial Intelligence and workflow automation.
 It helps businesses and users manage pricing discussions, deal negotiations, and follow-ups efficiently with minimal manual effort.
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  2. Key Features
+    
 AI-powered email response generation
 Automated email negotiation workflows
 Smart handling of incoming and outgoing emails
