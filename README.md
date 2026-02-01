@@ -13,6 +13,7 @@ Secure login and dashboard access.
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
    3.Used Technology
+   
  Backend: Python (Django)
  Frontend: HTML, CSS, JavaScript
  Automation: n8n (Webhook integration)
