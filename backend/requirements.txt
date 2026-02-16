@@ -1,4 +1,4 @@
-Django>=6.0
-djangorestframework>=3.16.0
-requests>=2.31.0
+Django==5.2.11
+djangorestframework==3.16.1
+requests==2.32.5
 

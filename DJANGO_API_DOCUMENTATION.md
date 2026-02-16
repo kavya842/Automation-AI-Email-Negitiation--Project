@@ -1,48 +1,68 @@
 # Django Backend API Documentation
 
-## 📋 API Endpoints Overview
+## Overview
 
-### Base URL Structure
-- Main URLs are under: `http://127.0.0.1:8000/`
-- API endpoints: `http://127.0.0.1:8000/api/` or `http://127.0.0.1:8000/`
+This document describes the backend API and web endpoints for the Django Deals system. The application integrates with n8n automation to manage collaboration emails and track deal workflows.
 
 ---
 
-##  API Endpoints (n8n Integration)
+## API Endpoints (n8n Integration)
 
-### 1. **Save Email** (n8n Entry Point)
-**Endpoint:** `POST /save-email/` or `POST /api/save-email/`
+* Root URL: `http://127.0.0.1:8000/`
+* API endpoints are accessible at:
 
-**Purpose:** n8n automation  main entry point.
+  * `http://127.0.0.1:8000/save-email/`
+  * `http://127.0.0.1:8000/api/save-email/`
 
-**Authentication:** Not required (CSRF exempt)
+---
 
-**Request Body (JSON):**
-```json
+# API Endpoints (n8n Integration)
+
+## 1. Save Email — Primary n8n Entry Point
+
+**Endpoint**
+`POST /save-email/` or `POST /api/save-email/`
+
+**Purpose**
+This endpoint acts as the primary entry point for n8n automation. It saves incoming and outgoing emails, creates or updates deals, and maintains conversation history.
+
+**Authentication**
+Not required (CSRF exempt)
+
+### Request Body (JSON)
+
+```
+json
 {
-  "thread_id": "19ba740d2519c1e2",          // Required - Gmail thread ID
-  "subject": "Collaboration mail",          // Required
-  "body": "Hi, I want to collaborate...",   // Required - Email body
-  "from_email": "client@gmail.com",         // Required - Sender email
-  "to_email": "your@gmail.com",             // Required - Receiver email
-  "direction": "INCOMING",                  // Required - "INCOMING" or "OUTGOING"
-  "ai_generated_reply": "Thanks for...",    // Optional - AI generated reply text
-  "brand_name": "Brand Name"                // Optional - Client brand name
+  "thread_id": "19ba740d2519c1e2",
+  "subject": "Collaboration mail",
+  "body": "Hi, I want to collaborate...",
+  "from_email": "client@gmail.com",
+  "to_email": "your@gmail.com",
+  "direction": "INCOMING",
+  "ai_generated_reply": "Thanks for...",
+  "brand_name": "Brand Name"
 }
 ```
 
-**How it Works:**
-1. ✅ Validates required fields (thread_id, subject, body, from_email, to_email, direction)
-2. ✅ Creates or gets Client using `from_email`
-3. ✅ Creates or gets Deal using `thread_id` (1 thread = 1 Deal)
-4. ✅ Saves AI reply if provided
-5. ✅ Creates EmailMessage record
-6. ✅ **Status Update Logic:**
-   - If `direction = "OUTGOING"` → Status = `WAITING_FOR_CLIENT` 
-   - If `direction = "INCOMING"` and status is `WAITING_FOR_CLIENT` → Status = `PENDING_CREATOR` (Client 2nd reply)
+### Processing Logic
 
-**Response (Success - 201):**
-```json
+1. Validates required fields:
+
+   * thread_id, subject, body, from_email, to_email, direction
+2. Creates or retrieves a Client using the sender email.
+3. Creates or retrieves a Deal using the thread ID (one thread = one deal).
+4. Saves the AI reply if provided.
+5. Creates an EmailMessage record.
+6. Updates deal status automatically:
+
+   * OUTGOING → `WAITING_FOR_CLIENT`
+   * INCOMING (after waiting) → `PENDING_CREATOR`
+
+### Success Response (201)
+
+```
+json
 {
   "status": "success",
   "deal_id": 4,
@@ -52,45 +72,59 @@
 }
 ```
 
-**Response (Error - 400):**
-```json
+### Error Responses
+
+**400**
+
+```
+json
 {
-  "error": "Missing required fields: thread_id, subject"
+  "error": "Missing required fields"
 }
 ```
 
-**Response (Error - 500):**
-```json
+**500**
+
+```
+json
 {
-  "error": "Server error: [error details]"
+  "error": "Server error"
 }
 ```
 
 ---
 
-### 2. **Save Dashboard Deal** (Manual Creation)
-**Endpoint:** `POST /api/dashboard/deal/`
+## 2. Save Dashboard Deal — Manual Creation
 
-**Purpose:** Dashboard manually deal create 
+**Endpoint**
+`POST /api/dashboard/deal/`
 
-**Authentication:** Not required (CSRF exempt)
+**Purpose**
+Allows manual creation of deals from the dashboard.
 
-**Request Body (JSON):**
-```json
+**Authentication**
+Not required (CSRF exempt)
+
+### Request Body
+
+```
+json
 {
-  "from_email": "client@gmail.com",         // Required
-  "subject": "Test Deal",                   // Required
-  "incoming_body": "Email body text",       // Required
-  "ai_reply_body": "AI reply text",         // Optional
-  "thread_id": "manual_123",                // Optional - auto-generated if not provided
-  "status": "WAITING_FOR_CLIENT",           // Optional - defaults to WAITING_FOR_CLIENT
-  "to_email": "your@gmail.com",             // Optional
-  "brand_name": "Brand Name"                // Optional
+  "from_email": "client@gmail.com",
+  "subject": "Test Deal",
+  "incoming_body": "Email body text",
+  "ai_reply_body": "AI reply text",
+  "thread_id": "manual_123",
+  "status": "WAITING_FOR_CLIENT",
+  "to_email": "your@gmail.com",
+  "brand_name": "Brand Name"
 }
 ```
 
-**Response (Success - 201):**
-```json
+### Success Response
+
+```
+json
 {
   "status": "success",
   "deal_id": 5,
@@ -100,9 +134,10 @@
 
 ---
 
-##  Web Pages (HTML Views)
+## Web Pages (HTML Views)
 
-### 3. **Dashboard Page**
+## 3. Dashboard Page
+
 **Endpoint:** `GET /dashboard/`
 
 **Purpose:** All deal dashboard.
@@ -130,29 +165,51 @@
 
 **Authentication:** Required
 
-**What it Shows:**
-- Deal information (client, subject, status)
-- All email messages in the thread (INCOMING & OUTGOING)
-- AI generated reply (editable)
-- Accept/Reject buttons (only if status is `PENDING_CREATOR`)
+Displays:
+
+* Deal statistics (NEW, WAITING, PENDING, COMPLETED, REJECTED)
+* List of all deals with status badges
+* Access to detailed deal pages
+
+### Status Colors
+
+* NEW → Blue
+* WAITING_FOR_CLIENT → Yellow
+* PENDING_CREATOR → Purple
+* COMPLETED → Green
+* REJECTED → Red
 
 ---
 
-### 5. **Accept Deal**
-**Endpoint:** `POST /deal/<deal_id>/accept/`
+## 4. Deal Detail Page
 
-**Purpose:** Deal accept 
-
+**Endpoint:** `GET /deal/<deal_id>/`
 **Authentication:** Required
 
-**What it Does:**
-1. ✅ Changes deal status to `COMPLETED`
-2. ✅ Updates `updated_at` timestamp
-3. ✅ Sends webhook to n8n (if `N8N_WEBHOOK_URL` configured)
-4. ✅ Redirects to deal detail page
+Displays:
 
-**n8n Webhook Data:**
-```json
+* Deal information
+* Email thread history
+* Editable AI reply
+* Accept/Reject actions (when status is PENDING_CREATOR)
+
+---
+
+## 5. Accept Deal
+
+**Endpoint:** `POST /deal/<deal_id>/accept/`
+
+Actions:
+
+1. Updates status to `COMPLETED`
+2. Updates timestamp
+3. Sends webhook to n8n (if configured)
+4. Redirects to deal details page
+
+### Webhook Payload
+
+```
+json
 {
   "action": "accept",
   "thread_id": "19ba740d2519c1e2",
@@ -163,276 +220,164 @@
 
 ---
 
-### 6. **Reject Deal**
+## 6. Reject Deal
+
 **Endpoint:** `POST /deal/<deal_id>/reject/`
 
-**Purpose:** Deal reject 
+Actions:
 
-**Authentication:** Required
-
-**What it Does:**
-1. ✅ Changes deal status to `REJECTED`
-2. ✅ Updates `updated_at` timestamp
-3. ✅ Sends webhook to n8n (if configured)
-4. ✅ Redirects to deal detail page
-
-**n8n Webhook Data:**
-```json
-{
-  "action": "reject",
-  "thread_id": "19ba740d2519c1e2",
-  "deal_id": 4,
-  "ai_reply": "Thanks for collaboration..."
-}
-```
+1. Updates status to `REJECTED`
+2. Sends webhook to n8n
+3. Redirects to deal details page
 
 ---
 
-### 7. **Update AI Reply**
+## 7. Update AI Reply
+
 **Endpoint:** `POST /deal/<deal_id>/update-reply/`
 
-**Purpose:** AI generated reply edit 
-
-**Authentication:** Required
-
-**Request Body (Form Data):**
-```
-ai_reply: "Updated AI reply text"
-```
-
-**What it Does:**
-1. ✅ Updates `ai_generated_reply` field in Deal
-2. ✅ Updates `updated_at` timestamp
-3. ✅ Redirects to deal detail page
+Updates the AI-generated reply and redirects to the deal page.
 
 ---
 
-##  Authentication
+## Authentication
 
-### 8. **Login**
-**Endpoint:** `GET /login/` (page) or `POST /login/` (submit)
+## Login
 
-**Purpose:** User login .
+**Endpoint:** `GET/POST /login/`
 
-**POST Request Body (Form Data):**
-```
-username: "kavya"
-password: "password123"
-```
+Authenticates the user and creates a session.
 
-**What it Does:**
-- Authenticates user
-- Creates session
-- Redirects to dashboard or `next` URL
+## Logout
 
----
+**Endpoint:** `GET/POST /logout/`
 
-### 9. **Logout**
-**Endpoint:** `GET /logout/` or `POST /logout/`
+Ends the session and redirects to the login page.
 
-**Purpose:** User logout చేయడానికి.
+## Home Redirect
 
-**Authentication:** Required
-
-**What it Does:**
-- Logs out user
-- Destroys session
-- Redirects to login page
-
----
-
-### 10. **Home Page**
 **Endpoint:** `GET /`
 
-**Purpose:** Root URL - redirects based on authentication:
-- If logged in → `/dashboard/`
-- If not logged in → `/login/`
+Redirects:
+
+* Logged-in users → Dashboard
+* Guests → Login page
 
 ---
 
-##  Complete Status Flow
+## Complete Deal Status Flow
 
 ```
-1. Client sends first email (INCOMING)
-   ↓
-   Deal created with status: NEW
-   ↓
-2. You send AI reply (OUTGOING)
-   ↓
-   Status changes to: WAITING_FOR_CLIENT
-   ↓
-3. Client replies again (INCOMING)
-   ↓
-   Status changes to: PENDING_CREATOR
-   ↓
-4. You click Accept
-   ↓
-   Status changes to: COMPLETED
+Client sends email → NEW
+You send reply → WAITING_FOR_CLIENT
+Client replies again → PENDING_CREATOR
+You accept → COMPLETED
 ```
 
 ---
 
-##  n8n Integration Flow
+## n8n Integration Flow
 
-### Incoming Email (Client → You):
-```
-Gmail Trigger (INCOMING email)
-  ↓
-n8n processes email
-  ↓
-POST /save-email/
-  Body: {
-    direction: "INCOMING",
-    thread_id: "...",
-    subject: "...",
-    body: "...",
-    from_email: "client@gmail.com",
-    to_email: "your@gmail.com"
-  }
-  ↓
-Backend:
-  - Creates/updates Deal
-  - Creates EmailMessage
-  - Updates status based on current status
-```
+### Incoming Email
 
-### Outgoing Email (You → Client):
-```
-After AI generates reply
-  ↓
-Send email via Gmail
-  ↓
-POST /save-email/
-  Body: {
-    direction: "OUTGOING",
-    thread_id: "...",
-    subject: "...",
-    body: "...",
-    from_email: "your@gmail.com",
-    to_email: "client@gmail.com",
-    ai_generated_reply: "AI reply text"
-  }
-  ↓
-Backend:
-  - Updates Deal status to WAITING_FOR_CLIENT
-  - Saves EmailMessage
-  - Sets our_reply_sent_at timestamp
-```
+Gmail → n8n → POST `/save-email/` → Deal created/updated
 
-### Accept/Reject Actions:
+### Outgoing Email
+
+AI reply → Gmail → POST `/save-email/` → Status updated
+
+### Accept/Reject
+
+Dashboard action → Webhook → n8n workflow
+
+---
+
+## Database Models
+
+## Client
+
+* email (unique)
+* brand_name
+* created_at
+
+## Deal
+
+* client (FK)
+* subject
+* thread_id (unique)
+* status
+* ai_generated_reply
+* timestamps
+
+## EmailMessage
+
+* deal (FK)
+* direction
+* subject
+* body
+* from_email
+* to_email
+* created_at
+
+---
+
+## Configuration
+
+### Optional Webhook Setting
+
 ```
-User clicks Accept/Reject in dashboard
-  ↓
-POST /deal/<id>/accept/ or /reject/
-  ↓
-Backend:
-  - Updates Deal status
-  - Sends webhook to n8n (if configured)
+python
+N8N_WEBHOOK_URL = "https://your-n8n-webhook-url"
 ```
 
 ---
 
-##  Database Models
+## Key Points:
 
-### Client Model:
-- `email` (unique) - Client email address
-- `brand_name` - Brand name (optional)
-- `created_at` - Creation timestamp
-
-### Deal Model:
-- `client` - ForeignKey to Client
-- `subject` - Email subject
-- `thread_id` - Gmail thread ID (unique)
-- `status` - One of: NEW, WAITING_FOR_CLIENT, PENDING_CREATOR, COMPLETED, REJECTED, AUTO_REJECTED
-- `ai_generated_reply` - AI generated reply text
-- `our_reply_sent_at` - Timestamp when we replied
-- `client_replied_at` - Timestamp when client replied
-- `created_at` - Creation timestamp
-- `updated_at` - Last update timestamp
-
-### EmailMessage Model:
-- `deal` - ForeignKey to Deal
-- `direction` - "INCOMING" or "OUTGOING"
-- `subject` - Email subject
-- `body` - Email body
-- `from_email` - Sender email
-- `to_email` - Receiver email
-- `created_at` - Creation timestamp
+1. Main API: `/save-email/`
+2. Thread ID maps one email thread to one deal.
+3. Accept/Reject is only available in `PENDING_CREATOR` status.
+4. Webhooks trigger n8n workflows automatically.
 
 ---
 
-##  Configuration
+## Quick Reference
 
-### Settings Required:
-```python
-# settings.py
-N8N_WEBHOOK_URL = "https://your-n8n-webhook-url"  # Optional
+| Endpoint                 | Method   | Auth | Purpose              |
+| ------------------------ | -------- | ---- | -------------------- |
+| /save-email/             | POST     | No   | Save email           |
+| /api/dashboard/deal/     | POST     | No   | Manual deal creation |
+| /dashboard/              | GET      | Yes  | View deals           |
+| /deal/<id>/              | GET      | Yes  | Deal details         |
+| /deal/<id>/accept/       | POST     | Yes  | Accept deal          |
+| /deal/<id>/reject/       | POST     | Yes  | Reject deal          |
+| /deal/<id>/update-reply/ | POST     | Yes  | Update AI reply      |
+| /login/                  | GET/POST | No   | Login                |
+| /logout/                 | GET/POST | Yes  | Logout               |
+
+---
+
+## Testing Examples
+
+### Test Incoming Email
+
 ```
-
----
-
-##  Key Points:
-
-1. **Main API:** `/save-email/` - n8n uses this to save all emails
-2. **Status Logic:**
-   - OUTGOING email → Always sets status to `WAITING_FOR_CLIENT`
-   - INCOMING email → Only changes to `PENDING_CREATOR` if current status is `WAITING_FOR_CLIENT`
-3. **Accept/Reject:** Only available when status is `PENDING_CREATOR`
-4. **Thread ID:** Same thread_id = Same Deal (Gmail thread concept)
-5. **Webhooks:** Accept/Reject actions trigger n8n webhooks (if configured)
-
----
-
-##  Quick Reference
-
-| Endpoint | Method | Auth | Purpose |
-|----------|--------|------|---------|
-| `/save-email/` | POST | No | n8n email save (main API) |
-| `/api/dashboard/deal/` | POST | No | Manual deal creation |
-| `/dashboard/` | GET | Yes | View all deals |
-| `/deal/<id>/` | GET | Yes | View deal details |
-| `/deal/<id>/accept/` | POST | Yes | Accept deal |
-| `/deal/<id>/reject/` | POST | Yes | Reject deal |
-| `/deal/<id>/update-reply/` | POST | Yes | Update AI reply |
-| `/login/` | GET/POST | No | Login |
-| `/logout/` | GET/POST | Yes | Logout |
-
----
-
-##  Testing Examples
-
-### Test Save Email (INCOMING):
-```bash
+bash
 curl -X POST http://127.0.0.1:8000/save-email/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "thread_id": "test123",
-    "subject": "Test Email",
-    "body": "Hello, I want to collaborate",
-    "from_email": "client@test.com",
-    "to_email": "you@test.com",
-    "direction": "INCOMING"
-  }'
+-H "Content-Type: application/json" \
+-d '{"thread_id":"test123","subject":"Test","body":"Hello","from_email":"client@test.com","to_email":"you@test.com","direction":"INCOMING"}'
 ```
 
-### Test Save Email (OUTGOING):
-```bash
+### Test Outgoing Email
+
+```
+bash
 curl -X POST http://127.0.0.1:8000/save-email/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "thread_id": "test123",
-    "subject": "Re: Test Email",
-    "body": "Thanks for your interest",
-    "from_email": "you@test.com",
-    "to_email": "client@test.com",
-    "direction": "OUTGOING",
-    "ai_generated_reply": "Thanks for your interest in collaboration"
-  }'
+-H "Content-Type: application/json" \
+-d '{"thread_id":"test123","subject":"Re: Test","body":"Thanks","from_email":"you@test.com","to_email":"client@test.com","direction":"OUTGOING"}'
 ```
 
 ---
 
-**Last Updated:** 2025-01-10
 **Version:** 1.0
-
-
+**Last Updated:** 2025-01-10
