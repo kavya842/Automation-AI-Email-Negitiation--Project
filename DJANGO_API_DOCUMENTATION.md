@@ -8,7 +8,7 @@
 
 ---
 
-## 🔥 API Endpoints (n8n Integration)
+##  API Endpoints (n8n Integration)
 
 ### 1. **Save Email** (n8n Entry Point)
 **Endpoint:** `POST /save-email/` or `POST /api/save-email/`
@@ -100,7 +100,7 @@
 
 ---
 
-## 🟢 Web Pages (HTML Views)
+##  Web Pages (HTML Views)
 
 ### 3. **Dashboard Page**
 **Endpoint:** `GET /dashboard/`
@@ -110,9 +110,9 @@
 **Authentication:** Required (login required)
 
 **What it Shows:**
-- 📊 Statistics cards: NEW, WAITING, PENDING, COMPLETED, REJECTED counts
-- 📋 All deals list with status badges
-- 🔗 "View Details" button for each deal
+-  Statistics cards: NEW, WAITING, PENDING, COMPLETED, REJECTED counts
+-  All deals list with status badges
+-  "View Details" button for each deal
 
 **Status Flow in Dashboard:**
 - **NEW** → Blue card ( email)
@@ -207,7 +207,7 @@ ai_reply: "Updated AI reply text"
 
 ---
 
-## 🔐 Authentication
+##  Authentication
 
 ### 8. **Login**
 **Endpoint:** `GET /login/` (page) or `POST /login/` (submit)
@@ -250,7 +250,7 @@ password: "password123"
 
 ---
 
-## 📊 Complete Status Flow
+##  Complete Status Flow
 
 ```
 1. Client sends first email (INCOMING)
@@ -272,7 +272,7 @@ password: "password123"
 
 ---
 
-## 🔄 n8n Integration Flow
+##  n8n Integration Flow
 
 ### Incoming Email (Client → You):
 ```
@@ -332,7 +332,7 @@ Backend:
 
 ---
 
-## 📝 Database Models
+##  Database Models
 
 ### Client Model:
 - `email` (unique) - Client email address
@@ -361,7 +361,7 @@ Backend:
 
 ---
 
-## ⚙️ Configuration
+##  Configuration
 
 ### Settings Required:
 ```python
@@ -371,7 +371,7 @@ N8N_WEBHOOK_URL = "https://your-n8n-webhook-url"  # Optional
 
 ---
 
-## 🎯 Key Points:
+##  Key Points:
 
 1. **Main API:** `/save-email/` - n8n uses this to save all emails
 2. **Status Logic:**
@@ -383,7 +383,7 @@ N8N_WEBHOOK_URL = "https://your-n8n-webhook-url"  # Optional
 
 ---
 
-## 🚀 Quick Reference
+##  Quick Reference
 
 | Endpoint | Method | Auth | Purpose |
 |----------|--------|------|---------|
@@ -399,7 +399,7 @@ N8N_WEBHOOK_URL = "https://your-n8n-webhook-url"  # Optional
 
 ---
 
-## ✅ Testing Examples
+##  Testing Examples
 
 ### Test Save Email (INCOMING):
 ```bash
