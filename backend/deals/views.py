@@ -7,6 +7,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
 from django.utils import timezone
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+
+
+def _sanitize_header(value):
+    """Sanitize header values by removing newlines and collapsing whitespace."""
+    if value is None:
+        return ""
+    return " ".join(str(value).splitlines()).strip()
 import json
 import requests
 
@@ -219,6 +227,36 @@ def accept_deal(request, deal_id):
             # Log error but don't fail the request
             print(f"Failed to send webhook: {e}")
 
+    # Send acceptance email to client (SMTP)
+    try:
+        sanitized_subject = _sanitize_header(deal.subject)
+        subject = f"Congratulations — your deal '{sanitized_subject}' is complete"
+        plain_body = (
+            f"Hello {deal.client.brand_name or deal.client.email},\n\n"
+            f"Congratulations! Your deal titled '{deal.subject}' has been completed successfully.\n\n"
+            "Thank you for working with us.\n\n"
+            "Best regards,\n"
+            "The Team"
+        )
+        html_body = (
+            f"<p>Hello {deal.client.brand_name or deal.client.email},</p>"
+            f"<p>Congratulations! Your deal titled <strong>{deal.subject}</strong> has been completed successfully.</p>"
+            "<p>Thank you for working with us.</p>"
+            "<p>Best regards,<br/>The Team</p>"
+        )
+
+        from_email = settings.DEFAULT_FROM_EMAIL
+        # Check if email credentials are configured
+        if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+            raise Exception("Email credentials not configured. Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD environment variables.")
+        
+        msg = EmailMultiAlternatives(subject=subject, body=plain_body, from_email=from_email, to=[deal.client.email])
+        msg.attach_alternative(html_body, "text/html")
+        msg.send(fail_silently=False)
+    except Exception as e:
+        messages.error(request, f"Failed to send acceptance email: {str(e)}")
+        print(f"Failed to send acceptance email: {e}")
+
     messages.success(request, "Deal accepted")
     return redirect("deal_detail", deal_id=deal.id)
 
@@ -246,6 +284,38 @@ def reject_deal(request, deal_id):
         except Exception as e:
             # Log error but don't fail the request
             print(f"Failed to send webhook: {e}")
+
+    # Send polite rejection email to client (SMTP)
+    try:
+        sanitized_subject = _sanitize_header(deal.subject)
+        subject = f"Update on your deal '{sanitized_subject}'"
+        plain_body = (
+            f"Hello {deal.client.brand_name or deal.client.email},\n\n"
+            "Thank you for reaching out and for your interest in collaborating with us. "
+            "After careful consideration, we regret to inform you that we are unable to proceed with this collaboration at this time.\n\n"
+            "We appreciate your understanding and hope we can work together on future opportunities.\n\n"
+            "Best regards,\n"
+            "The Team"
+        )
+        html_body = (
+            f"<p>Hello {deal.client.brand_name or deal.client.email},</p>"
+            "<p>Thank you for reaching out and for your interest in collaborating with us. "
+            "After careful consideration, we regret to inform you that we are unable to proceed with this collaboration at this time.</p>"
+            "<p>We appreciate your understanding and hope we can work together on future opportunities.</p>"
+            "<p>Best regards,<br/>The Team</p>"
+        )
+
+        from_email = settings.DEFAULT_FROM_EMAIL
+        # Check if email credentials are configured
+        if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
+            raise Exception("Email credentials not configured. Set EMAIL_HOST_USER and EMAIL_HOST_PASSWORD environment variables.")
+        
+        msg = EmailMultiAlternatives(subject=subject, body=plain_body, from_email=from_email, to=[deal.client.email])
+        msg.attach_alternative(html_body, "text/html")
+        msg.send(fail_silently=False)
+    except Exception as e:
+        messages.error(request, f"Failed to send rejection email: {str(e)}")
+        print(f"Failed to send rejection email: {e}")
 
     messages.success(request, "Deal rejected")
     return redirect("deal_detail", deal_id=deal.id)

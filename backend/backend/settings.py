@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -126,3 +127,20 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 
 N8N_WEBHOOK_URL = "http://localhost:5678/webhook-test/deal-action"
+
+
+# Email (SMTP) settings - configure via environment variables in production
+# Example (Windows PowerShell):
+# $env:EMAIL_HOST_USER = 'your@email.com'; $env:EMAIL_HOST_PASSWORD = 'app_password'
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'kavyavankayalapati9999@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'uqkj iufa jnww isrd')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+
+# Default from email - MUST be set to your Gmail address when using App Password
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'kavyavankayalapati9999@gmail.com')
+
+# Log email errors to console (helpful for debugging)
+EMAIL_DEBUG = os.environ.get('EMAIL_DEBUG', 'True') == 'True'
